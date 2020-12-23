@@ -1,4 +1,4 @@
-# selda_quiz_app
+# cet301 Simple Quiz App
 
 A new Flutter application.
 
