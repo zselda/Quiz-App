@@ -1,4 +1,4 @@
-# selda_quiz_app
+# Simple Quiz App
 
 A new Flutter application.
 
