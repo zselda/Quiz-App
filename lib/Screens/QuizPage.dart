@@ -1,4 +1,5 @@
 import 'ResultPage.dart';
+import 'HomePage.dart';
 import 'package:selda_quiz_app/Service/Question.dart';
 import 'package:selda_quiz_app/Service/QuizManager.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,9 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   QuizManager _manager = QuizManager();
+  Future<void> quizLoader;
+
+  int get $category_ID => null;
 
   List<Widget> getOptions(Question question) {
     List<Widget> optionButtons = [];
@@ -45,6 +49,13 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    quizLoader = _manager.LoadQuestions(10, $category_ID, '$difficult');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
@@ -52,11 +63,15 @@ class _QuizPageState extends State<QuizPage> {
               'Question ${_manager.getCurrentId()} of ${_manager.totalQuestionNumber()}', style: TextStyle (color: Colors.deepPurple),),
             backgroundColor: Colors.deepPurple[100]
         ),
-        body: Container(
-          padding: EdgeInsets.all(15.0),
-          child: Column(
-            children: [
-              Expanded(
+        body: FutureBuilder<void>(
+          future: quizLoader,
+          builder: (BuildContext context, AsyncSnapshot<void> snapshot) {
+           if (snapshot.connectionState == ConnectionState.done) {
+             return Container(
+              padding: EdgeInsets.all(15.0),
+              child: Column(
+                children: [
+                Expanded(
                 flex: 1,
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 30),
@@ -81,6 +96,10 @@ class _QuizPageState extends State<QuizPage> {
               )
             ],
           ),
-        ));
+         );
+         } else {
+           return Center(child: CircularProgressIndicator());
+          }
+          }));
   }
 }

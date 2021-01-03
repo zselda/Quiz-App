@@ -1,38 +1,47 @@
+
+import 'dart:io';
+import 'package:html_unescape/html_unescape.dart';
 import 'Question.dart';
 import 'Option.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as converter;
+import 'dart:async';
 
 class QuizManager {
   QuizManager() {
-    _questions.add(Question('Türkiye' 'nin başkenti neresidir?', [
-      Option('Ankara', 10),
-      Option('İstanbul', 5),
-      Option('Zurich', 0),
-      Option('Fransa', -5),
-    ]));
+  //
+  }
 
-    _questions.add(Question('Fransa' 'nın başkenti neresidir?', [
-      Option('Paris', 10),
-      Option('Milano', 5),
-      Option('Lens', 0),
-      Option('Türkiye', -5),
-    ]));
-    _questions.add(Question('İngiltere' 'nin başkenti neresidir?', [
-      Option('Londra', 10),
-      Option('Leeds', 5),
-      Option('İstanbul', 0),
-      Option('Africa', -5),
-    ]));
+  Future<void> LoadQuestions(int numberOfQuestions, int category_ID, String difficult) async {
+    var url =
+        'https://opentdb.com/api.php?amount=$numberOfQuestions&category=$category_ID&difficulty=$difficult&type=multiple';
+    var response = await http.get(url);
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      //print(response.body);
+      Map<String, dynamic> json = converter.jsonDecode(response.body);
+      for (int i = 0; i < json['results'].length; i++) {
+        var questionJson = json['results'][i];
+        print(questionJson['question']);
+        print(questionJson['correct_answer']);
+        print(questionJson['incorrect_answers']);
+        List<Option> options = [];
+        options.add(Option(questionJson['correct_answer'], 10));
+        for (int j = 0; j < questionJson['incorrect_answers'].length; j++) {
+          options.add(Option(questionJson['incorrect_answers'][j], 0));
+        }
+        Question question = Question(questionJson['question'], options);
+        _questions.add(question);
+      }
 
-    _questions.add(Question('Almanya' 'nin başkenti neresidir?', [
-      Option('Berlin', 10),
-      Option('Hamburg', 5),
-      Option('Napoli', 0),
-    ]));
-    _questions.shuffle();
-    for (var question in _questions) {
-      question.options.shuffle();
+      _questions.shuffle();
+      for (var question in _questions) {
+        question.options.shuffle();
+      }
     }
   }
+
+
   List<Question> _questions = [];
   int _score = 0;
   int currentQuestionId = 0;
